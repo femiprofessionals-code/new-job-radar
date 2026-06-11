@@ -13,11 +13,10 @@
  *   sync can run on a schedule while the scraper keeps writing.
  */
 import postgres from "postgres";
-import { inArray, eq, sql as dsql } from "drizzle-orm";
+import { inArray, sql as dsql } from "drizzle-orm";
 import { getDb, tables } from "@/db";
-import { analyzeMatch } from "@/lib/engines/scoring";
-
-const uid = () => crypto.randomUUID();
+import { extractSkills, inferSeniority } from "@/lib/ingest/normalize";
+import { scoreJobsForAllCandidates } from "@/lib/ingest/score";
 
 /* ── Column detection ── */
 
@@ -55,44 +54,6 @@ export interface SyncReport {
   candidatesScored: number;
   sample?: Record<string, unknown>;
   dryRun: boolean;
-}
-
-/* ── Skill extraction (when the legacy table has no skills column) ── */
-
-const SKILL_LEXICON = [
-  "React", "TypeScript", "JavaScript", "Next.js", "Vue.js", "Angular", "Svelte",
-  "Node.js", "Python", "Django", "Flask", "FastAPI", "Java", "Spring Boot", "Kotlin",
-  "Go", "Rust", "Ruby", "Rails", "PHP", "Laravel", "C#", ".NET", "C++", "Swift",
-  "PostgreSQL", "MySQL", "MongoDB", "Redis", "Kafka", "GraphQL", "REST APIs", "gRPC",
-  "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Terraform", "CI/CD", "Linux",
-  "Tailwind CSS", "CSS", "HTML", "Sass", "Webpack", "Vite", "Design Systems",
-  "Figma", "Sketch", "Prototyping", "User Research", "Interaction Design", "Accessibility",
-  "Product Strategy", "Roadmapping", "A/B Testing", "Agile", "Scrum", "Stakeholder Management",
-  "SQL", "dbt", "Airflow", "Snowflake", "Spark", "Pandas", "PyTorch", "TensorFlow",
-  "Machine Learning", "MLOps", "LLM", "Data Modeling", "ETL", "Tableau", "Looker",
-  "System Design", "Microservices", "Observability", "Performance Optimization",
-  "Testing Library", "Jest", "Cypress", "Playwright", "Salesforce", "Stripe",
-];
-
-function extractSkills(text: string): string[] {
-  const hay = ` ${text.toLowerCase()} `;
-  return SKILL_LEXICON.filter((s) => {
-    const needle = s.toLowerCase();
-    return hay.includes(` ${needle} `) || hay.includes(` ${needle},`) || hay.includes(` ${needle}.`) ||
-      hay.includes(`(${needle}`) || hay.includes(` ${needle})`) || hay.includes(` ${needle}/`) ||
-      hay.includes(`/${needle} `) || hay.includes(` ${needle};`) || hay.includes(`,${needle},`);
-  }).slice(0, 10);
-}
-
-function inferSeniority(title: string, raw?: string | null): string {
-  const t = `${raw ?? ""} ${title}`.toLowerCase();
-  if (/principal/.test(t)) return "principal";
-  if (/staff/.test(t)) return "staff";
-  if (/director|head of/.test(t)) return "director";
-  if (/\blead\b/.test(t)) return "lead";
-  if (/senior|sr\.?\b/.test(t)) return "senior";
-  if (/junior|jr\.?\b|entry|intern|graduate/.test(t)) return "junior";
-  return "mid";
 }
 
 function toList(v: unknown): string[] {
@@ -280,57 +241,9 @@ export async function syncLegacyJobs(opts: { dryRun?: boolean; limit?: number } 
     const updated = transformed.length - inserted;
 
     // Score new jobs for every candidate with a profile
-    const profiles = await db.select().from(tables.candidateProfiles);
-    let matchesCreated = 0;
-    for (const profile of profiles) {
-      const already = await db
-        .select({ jobId: tables.jobMatches.jobId })
-        .from(tables.jobMatches)
-        .where(eq(tables.jobMatches.userId, profile.userId));
-      const have = new Set(already.map((a) => a.jobId));
-      const docs = await db
-        .select({ atsScore: tables.documents.atsScore })
-        .from(tables.documents)
-        .where(eq(tables.documents.userId, profile.userId));
-      const bestAts = docs.reduce<number | null>(
-        (b, d) => (d.atsScore !== null && (b === null || d.atsScore > b) ? d.atsScore : b),
-        null
-      );
-      const signal = {
-        skills: profile.skills as string[],
-        yearsExperience: profile.yearsExperience,
-        targetRoles: profile.targetRoles as string[],
-        resumeAtsScore: bestAts,
-      };
-      const newMatches = transformed
-        .filter((j) => j.active && !have.has(j.id))
-        .map((j) => {
-          const a = analyzeMatch(signal, {
-            title: j.title,
-            skills: j.skills,
-            seniority: j.seniority,
-            postedAt: j.postedAt,
-            applicantEstimate: null,
-            remote: j.remote,
-          });
-          return {
-            id: uid(),
-            userId: profile.userId,
-            jobId: j.id,
-            interviewProbability: a.interviewProbability,
-            matchScore: a.matchScore,
-            matchReasons: a.matchReasons,
-            strengths: a.strengths,
-            gaps: a.gaps,
-            priority: a.priority,
-            competition: a.competition,
-          };
-        });
-      for (let i = 0; i < newMatches.length; i += BATCH) {
-        await db.insert(tables.jobMatches).values(newMatches.slice(i, i + BATCH)).onConflictDoNothing();
-      }
-      matchesCreated += newMatches.length;
-    }
+    const scored = await scoreJobsForAllCandidates(transformed);
+    const matchesCreated = scored.matchesCreated;
+    const profilesCount = scored.candidatesScored;
 
     return {
       sourceTable: "public.jobs",
@@ -341,7 +254,7 @@ export async function syncLegacyJobs(opts: { dryRun?: boolean; limit?: number } 
       updated,
       skipped: rows.length - transformed.length,
       matchesCreated,
-      candidatesScored: profiles.length,
+      candidatesScored: profilesCount,
       dryRun: false,
     };
   } finally {

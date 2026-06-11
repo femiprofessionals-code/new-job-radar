@@ -141,7 +141,22 @@ and salary negotiation — Stripe Connect payouts at an 80/20 split.
    lookup; the `users` table is the only integration point.
 7. **Deploy** — push to Vercel. `next build` is green with zero config.
 
-## Real-jobs sync (scraper → platform)
+## Job pipeline (native ingestion)
+
+The platform feeds itself — no external scraper required. `src/lib/ingest` pulls
+from free, keyless public job APIs on the daily cron (`/api/sync/jobs`,
+`vercel.json`):
+
+- **Greenhouse boards** (`INGEST_GREENHOUSE_BOARDS`, comma-separated company slugs)
+- **Lever postings** (`INGEST_LEVER_COMPANIES`)
+- **Remotive** and **Arbeitnow** (no config)
+
+Each run normalizes (HTML → text, salary parsing, skill extraction, seniority
+inference), upserts (`gh-`/`lv-`/`rmtv-`/`arb-` ids), deactivates postings that
+disappeared from their source, and scores new jobs for every candidate. Per-source
+failures are reported, never fatal. Test: `npx tsx scripts/test-ingest.ts`.
+
+## Legacy scraper sync (optional)
 
 `src/lib/sync/legacy-jobs.ts` flows jobs from a scraper's `public.jobs` table into
 `jobradar.jobs`, auto-detecting the column layout (title/company/salary/skills/url/…
