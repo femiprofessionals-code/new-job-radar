@@ -146,9 +146,12 @@ const SENIORITY_YEARS: Record<string, [number, number]> = {
 
 /* ── Seed entry point ──────────────────────────────────────── */
 
-export async function seedIfEmpty(db: DB): Promise<void> {
-  const existing = await db.select({ c: sql<number>`count(*)` }).from(schema.users);
+export async function seedIfEmpty(outer: DB): Promise<void> {
+  const existing = await outer.select({ c: sql<number>`count(*)` }).from(schema.users);
   if (Number(existing[0].c) > 0) return;
+
+  // All-or-nothing: a crash mid-seed must never leave a half-populated world.
+  await outer.transaction(async (db) => {
 
   /* Users */
   const candidateSkills = [
@@ -743,4 +746,5 @@ B.S. Computer Science — University of Texas at Austin (2017)`;
     { id: "tx-002", userId: DEMO_CANDIDATE_ID, expertId: DEMO_EXPERT_ID, reviewRequestId: "rr-002", description: "Cover Letter Review — Sarah Chen", amountCents: 5900, platformFeeCents: 1180, status: "succeeded", createdAt: daysAgo(3) },
     { id: "tx-003", userId: DEMO_CANDIDATE_ID, description: "Accelerator plan — monthly", amountCents: 4900, platformFeeCents: 0, status: "succeeded", createdAt: daysAgo(11) },
   ]);
+  });
 }
