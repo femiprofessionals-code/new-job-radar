@@ -15,7 +15,7 @@
 import postgres from "postgres";
 import { inArray, sql as dsql } from "drizzle-orm";
 import { getDb, tables } from "@/db";
-import { extractSkills, inferSeniority } from "@/lib/ingest/normalize";
+import { extractSkills, inferSeniority, htmlToText } from "@/lib/ingest/normalize";
 import { scoreJobsForAllCandidates } from "@/lib/ingest/score";
 
 /* ── Column detection ── */
@@ -25,7 +25,8 @@ const ALIASES: Record<string, string[]> = {
   title: ["title", "job_title", "position", "role", "name"],
   company: ["company", "company_name", "employer", "organization"],
   companyId: ["company_id"],
-  location: ["location", "city", "job_location", "locations"],
+  location: ["location", "location_raw", "location_city", "city", "job_location", "locations"],
+  locationCountry: ["location_country", "country"],
   remote: ["remote", "is_remote", "remote_ok", "workplace_type", "work_mode", "location_type"],
   salaryMin: ["salary_min", "min_salary", "salary_from", "compensation_min", "salary_low"],
   salaryMax: ["salary_max", "max_salary", "salary_to", "compensation_max", "salary_high"],
@@ -163,12 +164,17 @@ export async function syncLegacyJobs(opts: { dryRun?: boolean; limit?: number } 
       const title = String(get(row, "title") ?? "").trim();
       if (!legacyId || !title) return [];
 
-      const description = String(get(row, "description") ?? "").trim();
+      const description = htmlToText(String(get(row, "description") ?? "")).slice(0, 12_000);
       const company =
         String(get(row, "company") ?? "").trim() ||
         companyNames.get(String(get(row, "companyId") ?? "")) ||
         "Unknown Company";
-      const location = String(get(row, "location") ?? "").trim() || "Not specified";
+      const locCity = String(get(row, "location") ?? "").trim();
+      const locCountry = String(get(row, "locationCountry") ?? "").trim();
+      const location =
+        locCity && locCountry && !locCity.includes(locCountry)
+          ? `${locCity}, ${locCountry}`
+          : locCity || locCountry || "Not specified";
       const skillsRaw = toList(get(row, "skills"));
       const skills = skillsRaw.length >= 2 ? skillsRaw.slice(0, 10) : extractSkills(`${title} ${description}`);
       const postedRaw = get(row, "postedAt");
@@ -229,8 +235,13 @@ export async function syncLegacyJobs(opts: { dryRun?: boolean; limit?: number } 
           target: tables.jobs.id,
           set: {
             title: dsql`excluded.title`,
+            location: dsql`excluded.location`,
+            remote: dsql`excluded.remote`,
             salaryMin: dsql`excluded.salary_min`,
             salaryMax: dsql`excluded.salary_max`,
+            description: dsql`excluded.description`,
+            skills: dsql`excluded.skills`,
+            seniority: dsql`excluded.seniority`,
             active: dsql`excluded.active`,
             url: dsql`excluded.url`,
             postedAt: dsql`excluded.posted_at`,

@@ -62,21 +62,26 @@ export function inferSeniority(title: string, raw?: string | null): string {
   return "mid";
 }
 
-/** Strip HTML to plain text (job APIs return HTML descriptions). */
+/**
+ * Strip HTML to plain text. Entities are decoded FIRST because some APIs
+ * (notably Greenhouse) return HTML-escaped markup — decoding after stripping
+ * would leave the tags in the output.
+ */
 export function htmlToText(html: string): string {
   return html
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;|&apos;|&rsquo;|&#8217;/g, "'")
+    .replace(/&quot;|&ldquo;|&rdquo;/g, '"')
+    .replace(/&ndash;|&mdash;/g, "–")
+    .replace(/&amp;/g, "&")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/(p|div|li|h[1-6]|ul|ol)>/gi, "\n")
     .replace(/<li[^>]*>/gi, "• ")
     .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&quot;/g, '"')
     .replace(/[ \t]+/g, " ")
     .replace(/\n\s*\n\s*\n+/g, "\n\n")
     .trim();

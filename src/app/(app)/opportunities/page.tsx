@@ -17,7 +17,7 @@ import { formatSalaryRange, timeAgo } from "@/lib/utils";
 export const metadata = { title: "Opportunities" };
 
 export default async function OpportunitiesPage(props: {
-  searchParams: Promise<{ q?: string; min?: string; remote?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; min?: string; remote?: string; sort?: string; limit?: string }>;
 }) {
   const sp = await props.searchParams;
   const user = await requireUser();
@@ -27,6 +27,15 @@ export default async function OpportunitiesPage(props: {
     remoteOnly: sp.remote === "1",
     sort: sp.sort === "recent" ? "recent" : "probability",
   });
+
+  const limit = Math.min(500, Math.max(10, Number(sp.limit) || 50));
+  const visible = rows.slice(0, limit);
+  const moreParams = new URLSearchParams();
+  if (sp.q) moreParams.set("q", sp.q);
+  if (sp.min) moreParams.set("min", sp.min);
+  if (sp.remote) moreParams.set("remote", sp.remote);
+  if (sp.sort) moreParams.set("sort", sp.sort);
+  moreParams.set("limit", String(limit + 50));
 
   const freshCutoff = new Date(new Date().getTime() - 2 * 86_400_000);
   const fresh = rows.filter(
@@ -38,7 +47,7 @@ export default async function OpportunitiesPage(props: {
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-bold tracking-tight">Opportunity Engine</h1>
         <p className="text-sm text-ink-muted">
-          {rows.length} scored opportunities on your radar
+          {rows.length.toLocaleString()} scored opportunities on your radar{rows.length > visible.length && ` · showing top ${visible.length}`}
           {fresh > 0 && (
             <>
               {" · "}
@@ -78,7 +87,7 @@ export default async function OpportunitiesPage(props: {
 
       {/* List */}
       <div className="flex flex-col gap-2">
-        {rows.map((o) => (
+        {visible.map((o) => (
           <Card key={o.id} className="transition-colors hover:border-edge-strong">
             <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
               <Link href={`/opportunities/${o.jobId}`} className="flex min-w-0 flex-1 items-center gap-3">
@@ -151,6 +160,14 @@ export default async function OpportunitiesPage(props: {
             </CardContent>
           </Card>
         ))}
+        {rows.length > visible.length && (
+          <Link
+            href={`/opportunities?${moreParams.toString()}`}
+            className="mx-auto mt-1 rounded-lg border border-edge-strong px-4 py-2 text-xs text-ink-muted transition-colors hover:border-signal/40 hover:text-signal"
+          >
+            Show 50 more ({(rows.length - visible.length).toLocaleString()} remaining)
+          </Link>
+        )}
         {rows.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center text-sm text-ink-muted">

@@ -94,7 +94,7 @@ export async function fetchGreenhouse(): Promise<SourceResult[]> {
 
 /* ── Lever ── */
 
-const DEFAULT_LEVER_COMPANIES = ["plaid", "ramp", "scaleai", "voleon"];
+const DEFAULT_LEVER_COMPANIES = ["voleon", "kraken", "palantir"];
 
 interface LeverJob {
   id: string;
