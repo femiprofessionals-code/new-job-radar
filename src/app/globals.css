@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Job Radar Design System — dark-first, premium, data-dense.
+   Inspiration: Linear, Stripe Dashboard, Arc.
+   ───────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Canvas */
+  --color-canvas: #0a0a0f;
+  --color-surface: #111118;
+  --color-surface-2: #16161f;
+  --color-surface-3: #1c1c27;
+  --color-overlay: #1f1f2b;
+
+  /* Borders */
+  --color-edge: #23232f;
+  --color-edge-strong: #2e2e3d;
+
+  /* Text */
+  --color-ink: #ededf2;
+  --color-ink-muted: #9b9ba8;
+  --color-ink-faint: #62626f;
+
+  /* Brand — radar green signal */
+  --color-signal: #34e29a;
+  --color-signal-dim: #1f8a60;
+  --color-signal-soft: rgba(52, 226, 154, 0.12);
+
+  /* Semantic */
+  --color-info: #6e9bff;
+  --color-info-soft: rgba(110, 155, 255, 0.12);
+  --color-warn: #ffc24d;
+  --color-warn-soft: rgba(255, 194, 77, 0.12);
+  --color-danger: #ff6471;
+  --color-danger-soft: rgba(255, 100, 113, 0.12);
+  --color-violet: #a78bfa;
+  --color-violet-soft: rgba(167, 139, 250, 0.12);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-card: 0.75rem;
+
+  --animate-pulse-signal: pulse-signal 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-radar-sweep: radar-sweep 3s linear infinite;
+  --animate-fade-up: fade-up 0.4s ease both;
+}
+
+@keyframes pulse-signal {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(52, 226, 154, 0.25);
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-edge-strong);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Subtle grid texture for the canvas — Bloomberg-terminal density cue */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Focus rings */
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Number tabular alignment for metrics */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,53 @@
+/**
+ * Database client.
+ *
+ * DEMO MODE (default): an embedded PostgreSQL (PGlite) persisted to `.data/pglite`,
+ * migrated and seeded automatically on first boot. Real SQL, real transactions,
+ * real row-level locking semantics — zero external services required.
+ *
+ * PRODUCTION: set DATABASE_URL (e.g. your Supabase connection string) and the
+ * exact same Drizzle schema and queries run against managed Postgres.
+ */
+import { drizzle as drizzlePglite, type PgliteDatabase } from "drizzle-orm/pglite";
+import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
+import { migrate as migratePglite } from "drizzle-orm/pglite/migrator";
+import { PGlite } from "@electric-sql/pglite";
+import postgres from "postgres";
+import path from "path";
+import fs from "fs";
+import * as schema from "./schema";
+import { seedIfEmpty } from "./seed";
+
+export type Database =
+  | PgliteDatabase<typeof schema>
+  | ReturnType<typeof drizzlePostgres<typeof schema>>;
+
+const globalForDb = globalThis as unknown as {
+  __jobRadarDb?: Promise<Database>;
+};
+
+async function createDb(): Promise<Database> {
+  if (process.env.DATABASE_URL) {
+    const client = postgres(process.env.DATABASE_URL, { prepare: false });
+    return drizzlePostgres(client, { schema });
+  }
+
+  const dataDir = path.join(process.cwd(), ".data", "pglite");
+  fs.mkdirSync(dataDir, { recursive: true });
+  const pglite = new PGlite(dataDir);
+  const db = drizzlePglite(pglite, { schema });
+  await migratePglite(db, {
+    migrationsFolder: path.join(process.cwd(), "drizzle"),
+  });
+  await seedIfEmpty(db);
+  return db;
+}
+
+export function getDb(): Promise<Database> {
+  if (!globalForDb.__jobRadarDb) {
+    globalForDb.__jobRadarDb = createDb();
+  }
+  return globalForDb.__jobRadarDb;
+}
+
+export * as tables from "./schema";
