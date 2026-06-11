@@ -1,6 +1,5 @@
 import {
-  pgTable,
-  pgEnum,
+  pgSchema,
   text,
   integer,
   real,
@@ -11,13 +10,21 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
+/**
+ * All platform tables live in a dedicated Postgres schema so migrations are
+ * safe to run against a database that already contains other applications'
+ * tables (e.g. a legacy `public.jobs`). Nothing outside this namespace is
+ * ever touched.
+ */
+export const jobradar = pgSchema("jobradar");
+
 /* ────────────────────────── Enums ────────────────────────── */
 
-export const userRole = pgEnum("user_role", ["candidate", "expert", "admin"]);
+export const userRole = jobradar.enum("user_role", ["candidate", "expert", "admin"]);
 
-export const plan = pgEnum("plan", ["free", "pro", "accelerator", "elite"]);
+export const plan = jobradar.enum("plan", ["free", "pro", "accelerator", "elite"]);
 
-export const applicationStage = pgEnum("application_stage", [
+export const applicationStage = jobradar.enum("application_stage", [
   "saved",
   "preparing",
   "reviewed",
@@ -29,13 +36,13 @@ export const applicationStage = pgEnum("application_stage", [
   "rejected",
 ]);
 
-export const documentType = pgEnum("document_type", [
+export const documentType = jobradar.enum("document_type", [
   "resume",
   "cover_letter",
   "linkedin",
 ]);
 
-export const serviceType = pgEnum("service_type", [
+export const serviceType = jobradar.enum("service_type", [
   "resume_review",
   "cover_letter_review",
   "linkedin_review",
@@ -44,7 +51,7 @@ export const serviceType = pgEnum("service_type", [
   "salary_negotiation",
 ]);
 
-export const expertCategory = pgEnum("expert_category", [
+export const expertCategory = jobradar.enum("expert_category", [
   "resume_expert",
   "ats_expert",
   "recruiter",
@@ -54,7 +61,7 @@ export const expertCategory = pgEnum("expert_category", [
   "executive_advisor",
 ]);
 
-export const reviewStatus = pgEnum("review_status", [
+export const reviewStatus = jobradar.enum("review_status", [
   "available",
   "claimed",
   "in_progress",
@@ -63,7 +70,7 @@ export const reviewStatus = pgEnum("review_status", [
   "cancelled",
 ]);
 
-export const interviewType = pgEnum("interview_type", [
+export const interviewType = jobradar.enum("interview_type", [
   "phone_screen",
   "technical",
   "behavioral",
@@ -72,33 +79,33 @@ export const interviewType = pgEnum("interview_type", [
   "final",
 ]);
 
-export const interviewStatus = pgEnum("interview_status", [
+export const interviewStatus = jobradar.enum("interview_status", [
   "scheduled",
   "completed",
   "cancelled",
   "no_show",
 ]);
 
-export const mockMode = pgEnum("mock_mode", ["ai", "human"]);
+export const mockMode = jobradar.enum("mock_mode", ["ai", "human"]);
 
-export const mockStatus = pgEnum("mock_status", [
+export const mockStatus = jobradar.enum("mock_status", [
   "scheduled",
   "in_progress",
   "completed",
   "cancelled",
 ]);
 
-export const actionStatus = pgEnum("action_status", [
+export const actionStatus = jobradar.enum("action_status", [
   "pending",
   "done",
   "dismissed",
 ]);
 
-export const priority = pgEnum("priority", ["critical", "high", "medium", "low"]);
+export const priority = jobradar.enum("priority", ["critical", "high", "medium", "low"]);
 
-export const competition = pgEnum("competition", ["low", "medium", "high"]);
+export const competition = jobradar.enum("competition", ["low", "medium", "high"]);
 
-export const txStatus = pgEnum("tx_status", [
+export const txStatus = jobradar.enum("tx_status", [
   "pending",
   "succeeded",
   "refunded",
@@ -107,7 +114,7 @@ export const txStatus = pgEnum("tx_status", [
 
 /* ────────────────────────── Identity ────────────────────────── */
 
-export const users = pgTable("users", {
+export const users = jobradar.table("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
@@ -116,7 +123,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const candidateProfiles = pgTable("candidate_profiles", {
+export const candidateProfiles = jobradar.table("candidate_profiles", {
   userId: text("user_id")
     .primaryKey()
     .references(() => users.id),
@@ -135,7 +142,7 @@ export const candidateProfiles = pgTable("candidate_profiles", {
 
 /* ────────────────────────── Opportunity Engine ────────────────────────── */
 
-export const jobs = pgTable(
+export const jobs = jobradar.table(
   "jobs",
   {
     id: text("id").primaryKey(),
@@ -158,7 +165,7 @@ export const jobs = pgTable(
   (t) => [index("jobs_posted_idx").on(t.postedAt)]
 );
 
-export const jobMatches = pgTable(
+export const jobMatches = jobradar.table(
   "job_matches",
   {
     id: text("id").primaryKey(),
@@ -182,7 +189,7 @@ export const jobMatches = pgTable(
 
 /* ────────────────────────── Application Engine ────────────────────────── */
 
-export const documents = pgTable("documents", {
+export const documents = jobradar.table("documents", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -198,7 +205,7 @@ export const documents = pgTable("documents", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const applications = pgTable(
+export const applications = jobradar.table(
   "applications",
   {
     id: text("id").primaryKey(),
@@ -226,7 +233,7 @@ export const applications = pgTable(
   ]
 );
 
-export const applicationEvents = pgTable("application_events", {
+export const applicationEvents = jobradar.table("application_events", {
   id: text("id").primaryKey(),
   applicationId: text("application_id")
     .notNull()
@@ -238,7 +245,7 @@ export const applicationEvents = pgTable("application_events", {
 
 /* ────────────────────────── Expert Marketplace ────────────────────────── */
 
-export const experts = pgTable("experts", {
+export const experts = jobradar.table("experts", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -260,7 +267,7 @@ export const experts = pgTable("experts", {
   stripeConnectAccountId: text("stripe_connect_account_id"),
 });
 
-export const expertServices = pgTable("expert_services", {
+export const expertServices = jobradar.table("expert_services", {
   id: text("id").primaryKey(),
   expertId: text("expert_id")
     .notNull()
@@ -274,7 +281,7 @@ export const expertServices = pgTable("expert_services", {
 });
 
 /* Review queue — experts never see documents before an atomic claim. */
-export const reviewRequests = pgTable(
+export const reviewRequests = jobradar.table(
   "review_requests",
   {
     id: text("id").primaryKey(),
@@ -298,7 +305,7 @@ export const reviewRequests = pgTable(
   (t) => [index("review_requests_status_idx").on(t.status)]
 );
 
-export const reviewFeedback = pgTable("review_feedback", {
+export const reviewFeedback = jobradar.table("review_feedback", {
   id: text("id").primaryKey(),
   reviewRequestId: text("review_request_id")
     .notNull()
@@ -320,7 +327,7 @@ export const reviewFeedback = pgTable("review_feedback", {
 
 /* ────────────────────────── Interview Engine ────────────────────────── */
 
-export const interviews = pgTable("interviews", {
+export const interviews = jobradar.table("interviews", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -336,7 +343,7 @@ export const interviews = pgTable("interviews", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const mockSessions = pgTable("mock_sessions", {
+export const mockSessions = jobradar.table("mock_sessions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -361,7 +368,7 @@ export const mockSessions = pgTable("mock_sessions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const interviewKits = pgTable("interview_kits", {
+export const interviewKits = jobradar.table("interview_kits", {
   id: text("id").primaryKey(),
   company: text("company").notNull(),
   role: text("role").notNull(),
@@ -379,7 +386,7 @@ export const interviewKits = pgTable("interview_kits", {
 
 /* ────────────────────────── Career Health & Copilot ────────────────────────── */
 
-export const healthSnapshots = pgTable(
+export const healthSnapshots = jobradar.table(
   "health_snapshots",
   {
     id: text("id").primaryKey(),
@@ -397,7 +404,7 @@ export const healthSnapshots = pgTable(
   (t) => [index("health_user_created_idx").on(t.userId, t.createdAt)]
 );
 
-export const copilotActions = pgTable("copilot_actions", {
+export const copilotActions = jobradar.table("copilot_actions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -413,7 +420,7 @@ export const copilotActions = pgTable("copilot_actions", {
   resolvedAt: timestamp("resolved_at"),
 });
 
-export const copilotMessages = pgTable("copilot_messages", {
+export const copilotMessages = jobradar.table("copilot_messages", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -425,7 +432,7 @@ export const copilotMessages = pgTable("copilot_messages", {
 
 /* ────────────────────────── Billing ────────────────────────── */
 
-export const subscriptions = pgTable("subscriptions", {
+export const subscriptions = jobradar.table("subscriptions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -438,7 +445,7 @@ export const subscriptions = pgTable("subscriptions", {
   stripeSubscriptionId: text("stripe_subscription_id"),
 });
 
-export const transactions = pgTable("transactions", {
+export const transactions = jobradar.table("transactions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -453,7 +460,7 @@ export const transactions = pgTable("transactions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const notifications = pgTable("notifications", {
+export const notifications = jobradar.table("notifications", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()

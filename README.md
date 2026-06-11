@@ -120,9 +120,11 @@ and salary negotiation — Stripe Connect payouts at an 80/20 split.
 
 ## Going live
 
-1. **Database (Supabase)** — create a project, set `DATABASE_URL`, run
-   `npx drizzle-kit migrate` (migrations in `./drizzle` are the same ones demo mode
-   applies to PGlite). Optionally port `src/db/seed.ts` for staging data.
+1. **Database (Supabase)** — set `DATABASE_URL` and run `npx drizzle-kit migrate`.
+   All platform tables live in an isolated **`jobradar` Postgres schema**, so the
+   migration is safe to run against a database that already contains other
+   applications' tables (a legacy `public.jobs`, scrapers, etc.) — nothing outside
+   the `jobradar` namespace is read or written.
 2. **AI (Claude)** — set `ANTHROPIC_API_KEY`. Copilot chat, resume tailoring, cover
    letters, and mock interviews switch from the demo synthesizer to real model calls
    instantly. `OPENAI_API_KEY` enables the fallback provider.

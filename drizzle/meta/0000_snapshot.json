@@ -1,12 +1,12 @@
 {
-  "id": "1c24c2d0-0a0f-40a2-81e8-48fb93784cff",
+  "id": "345e6713-0676-41b1-b103-594e427e2d8d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.application_events": {
+    "jobradar.application_events": {
       "name": "application_events",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -46,6 +46,7 @@
           "name": "application_events_application_id_applications_id_fk",
           "tableFrom": "application_events",
           "tableTo": "applications",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "application_id"
           ],
@@ -62,9 +63,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.applications": {
+    "jobradar.applications": {
       "name": "applications",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -87,7 +88,7 @@
         "stage": {
           "name": "stage",
           "type": "application_stage",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'saved'"
@@ -186,6 +187,7 @@
           "name": "applications_user_id_users_id_fk",
           "tableFrom": "applications",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -199,6 +201,7 @@
           "name": "applications_job_id_jobs_id_fk",
           "tableFrom": "applications",
           "tableTo": "jobs",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "job_id"
           ],
@@ -212,6 +215,7 @@
           "name": "applications_resume_document_id_documents_id_fk",
           "tableFrom": "applications",
           "tableTo": "documents",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "resume_document_id"
           ],
@@ -225,6 +229,7 @@
           "name": "applications_cover_letter_document_id_documents_id_fk",
           "tableFrom": "applications",
           "tableTo": "documents",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "cover_letter_document_id"
           ],
@@ -241,9 +246,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.candidate_profiles": {
+    "jobradar.candidate_profiles": {
       "name": "candidate_profiles",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "user_id": {
           "name": "user_id",
@@ -305,7 +310,7 @@
         "plan": {
           "name": "plan",
           "type": "plan",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'free'"
@@ -331,6 +336,7 @@
           "name": "candidate_profiles_user_id_users_id_fk",
           "tableFrom": "candidate_profiles",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -347,9 +353,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.copilot_actions": {
+    "jobradar.copilot_actions": {
       "name": "copilot_actions",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -396,7 +402,7 @@
         "priority": {
           "name": "priority",
           "type": "priority",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'medium'"
@@ -404,7 +410,7 @@
         "status": {
           "name": "status",
           "type": "action_status",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'pending'"
@@ -429,6 +435,7 @@
           "name": "copilot_actions_user_id_users_id_fk",
           "tableFrom": "copilot_actions",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -445,9 +452,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.copilot_messages": {
+    "jobradar.copilot_messages": {
       "name": "copilot_messages",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -487,6 +494,7 @@
           "name": "copilot_messages_user_id_users_id_fk",
           "tableFrom": "copilot_messages",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -503,9 +511,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.documents": {
+    "jobradar.documents": {
       "name": "documents",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -522,7 +530,7 @@
         "type": {
           "name": "type",
           "type": "document_type",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true
         },
@@ -584,6 +592,7 @@
           "name": "documents_user_id_users_id_fk",
           "tableFrom": "documents",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -597,6 +606,7 @@
           "name": "documents_job_id_jobs_id_fk",
           "tableFrom": "documents",
           "tableTo": "jobs",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "job_id"
           ],
@@ -613,9 +623,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.expert_services": {
+    "jobradar.expert_services": {
       "name": "expert_services",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -632,7 +642,7 @@
         "type": {
           "name": "type",
           "type": "service_type",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true
         },
@@ -675,6 +685,7 @@
           "name": "expert_services_expert_id_experts_id_fk",
           "tableFrom": "expert_services",
           "tableTo": "experts",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "expert_id"
           ],
@@ -691,9 +702,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.experts": {
+    "jobradar.experts": {
       "name": "experts",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -808,6 +819,7 @@
           "name": "experts_user_id_users_id_fk",
           "tableFrom": "experts",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -832,9 +844,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.health_snapshots": {
+    "jobradar.health_snapshots": {
       "name": "health_snapshots",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -904,6 +916,7 @@
           "name": "health_snapshots_user_id_users_id_fk",
           "tableFrom": "health_snapshots",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -920,9 +933,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.interview_kits": {
+    "jobradar.interview_kits": {
       "name": "interview_kits",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -978,9 +991,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.interviews": {
+    "jobradar.interviews": {
       "name": "interviews",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1003,14 +1016,14 @@
         "type": {
           "name": "type",
           "type": "interview_type",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true
         },
         "status": {
           "name": "status",
           "type": "interview_status",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'scheduled'"
@@ -1060,6 +1073,7 @@
           "name": "interviews_user_id_users_id_fk",
           "tableFrom": "interviews",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -1073,6 +1087,7 @@
           "name": "interviews_application_id_applications_id_fk",
           "tableFrom": "interviews",
           "tableTo": "applications",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "application_id"
           ],
@@ -1089,9 +1104,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.job_matches": {
+    "jobradar.job_matches": {
       "name": "job_matches",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1147,7 +1162,7 @@
         "priority": {
           "name": "priority",
           "type": "priority",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'medium'"
@@ -1155,7 +1170,7 @@
         "competition": {
           "name": "competition",
           "type": "competition",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'medium'"
@@ -1196,6 +1211,7 @@
           "name": "job_matches_user_id_users_id_fk",
           "tableFrom": "job_matches",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -1209,6 +1225,7 @@
           "name": "job_matches_job_id_jobs_id_fk",
           "tableFrom": "job_matches",
           "tableTo": "jobs",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "job_id"
           ],
@@ -1225,9 +1242,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.jobs": {
+    "jobradar.jobs": {
       "name": "jobs",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1356,9 +1373,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.mock_sessions": {
+    "jobradar.mock_sessions": {
       "name": "mock_sessions",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1375,7 +1392,7 @@
         "mode": {
           "name": "mode",
           "type": "mock_mode",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'ai'"
@@ -1407,7 +1424,7 @@
         "status": {
           "name": "status",
           "type": "mock_status",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'in_progress'"
@@ -1458,6 +1475,7 @@
           "name": "mock_sessions_user_id_users_id_fk",
           "tableFrom": "mock_sessions",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -1471,6 +1489,7 @@
           "name": "mock_sessions_expert_id_experts_id_fk",
           "tableFrom": "mock_sessions",
           "tableTo": "experts",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "expert_id"
           ],
@@ -1487,9 +1506,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.notifications": {
+    "jobradar.notifications": {
       "name": "notifications",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1547,6 +1566,7 @@
           "name": "notifications_user_id_users_id_fk",
           "tableFrom": "notifications",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -1563,9 +1583,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.review_feedback": {
+    "jobradar.review_feedback": {
       "name": "review_feedback",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1631,6 +1651,7 @@
           "name": "review_feedback_review_request_id_review_requests_id_fk",
           "tableFrom": "review_feedback",
           "tableTo": "review_requests",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "review_request_id"
           ],
@@ -1644,6 +1665,7 @@
           "name": "review_feedback_expert_id_experts_id_fk",
           "tableFrom": "review_feedback",
           "tableTo": "experts",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "expert_id"
           ],
@@ -1668,9 +1690,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.review_requests": {
+    "jobradar.review_requests": {
       "name": "review_requests",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1687,7 +1709,7 @@
         "service_type": {
           "name": "service_type",
           "type": "service_type",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true
         },
@@ -1712,7 +1734,7 @@
         "status": {
           "name": "status",
           "type": "review_status",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'available'"
@@ -1789,6 +1811,7 @@
           "name": "review_requests_candidate_id_users_id_fk",
           "tableFrom": "review_requests",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "candidate_id"
           ],
@@ -1802,6 +1825,7 @@
           "name": "review_requests_document_id_documents_id_fk",
           "tableFrom": "review_requests",
           "tableTo": "documents",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "document_id"
           ],
@@ -1815,6 +1839,7 @@
           "name": "review_requests_application_id_applications_id_fk",
           "tableFrom": "review_requests",
           "tableTo": "applications",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "application_id"
           ],
@@ -1828,6 +1853,7 @@
           "name": "review_requests_target_expert_id_experts_id_fk",
           "tableFrom": "review_requests",
           "tableTo": "experts",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "target_expert_id"
           ],
@@ -1841,6 +1867,7 @@
           "name": "review_requests_claimed_by_experts_id_fk",
           "tableFrom": "review_requests",
           "tableTo": "experts",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "claimed_by"
           ],
@@ -1857,9 +1884,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.subscriptions": {
+    "jobradar.subscriptions": {
       "name": "subscriptions",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1876,7 +1903,7 @@
         "plan": {
           "name": "plan",
           "type": "plan",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'free'"
@@ -1913,6 +1940,7 @@
           "name": "subscriptions_user_id_users_id_fk",
           "tableFrom": "subscriptions",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -1937,9 +1965,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.transactions": {
+    "jobradar.transactions": {
       "name": "transactions",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -1987,7 +2015,7 @@
         "status": {
           "name": "status",
           "type": "tx_status",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'pending'"
@@ -2012,6 +2040,7 @@
           "name": "transactions_user_id_users_id_fk",
           "tableFrom": "transactions",
           "tableTo": "users",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "user_id"
           ],
@@ -2025,6 +2054,7 @@
           "name": "transactions_expert_id_experts_id_fk",
           "tableFrom": "transactions",
           "tableTo": "experts",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "expert_id"
           ],
@@ -2038,6 +2068,7 @@
           "name": "transactions_review_request_id_review_requests_id_fk",
           "tableFrom": "transactions",
           "tableTo": "review_requests",
+          "schemaTo": "jobradar",
           "columnsFrom": [
             "review_request_id"
           ],
@@ -2054,9 +2085,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.users": {
+    "jobradar.users": {
       "name": "users",
-      "schema": "",
+      "schema": "jobradar",
       "columns": {
         "id": {
           "name": "id",
@@ -2079,7 +2110,7 @@
         "role": {
           "name": "role",
           "type": "user_role",
-          "typeSchema": "public",
+          "typeSchema": "jobradar",
           "primaryKey": false,
           "notNull": true,
           "default": "'candidate'"
@@ -2116,18 +2147,18 @@
     }
   },
   "enums": {
-    "public.action_status": {
+    "jobradar.action_status": {
       "name": "action_status",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "pending",
         "done",
         "dismissed"
       ]
     },
-    "public.application_stage": {
+    "jobradar.application_stage": {
       "name": "application_stage",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "saved",
         "preparing",
@@ -2140,27 +2171,27 @@
         "rejected"
       ]
     },
-    "public.competition": {
+    "jobradar.competition": {
       "name": "competition",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "low",
         "medium",
         "high"
       ]
     },
-    "public.document_type": {
+    "jobradar.document_type": {
       "name": "document_type",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "resume",
         "cover_letter",
         "linkedin"
       ]
     },
-    "public.expert_category": {
+    "jobradar.expert_category": {
       "name": "expert_category",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "resume_expert",
         "ats_expert",
@@ -2171,9 +2202,9 @@
         "executive_advisor"
       ]
     },
-    "public.interview_status": {
+    "jobradar.interview_status": {
       "name": "interview_status",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "scheduled",
         "completed",
@@ -2181,9 +2212,9 @@
         "no_show"
       ]
     },
-    "public.interview_type": {
+    "jobradar.interview_type": {
       "name": "interview_type",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "phone_screen",
         "technical",
@@ -2193,17 +2224,17 @@
         "final"
       ]
     },
-    "public.mock_mode": {
+    "jobradar.mock_mode": {
       "name": "mock_mode",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "ai",
         "human"
       ]
     },
-    "public.mock_status": {
+    "jobradar.mock_status": {
       "name": "mock_status",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "scheduled",
         "in_progress",
@@ -2211,9 +2242,9 @@
         "cancelled"
       ]
     },
-    "public.plan": {
+    "jobradar.plan": {
       "name": "plan",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "free",
         "pro",
@@ -2221,9 +2252,9 @@
         "elite"
       ]
     },
-    "public.priority": {
+    "jobradar.priority": {
       "name": "priority",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "critical",
         "high",
@@ -2231,9 +2262,9 @@
         "low"
       ]
     },
-    "public.review_status": {
+    "jobradar.review_status": {
       "name": "review_status",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "available",
         "claimed",
@@ -2243,9 +2274,9 @@
         "cancelled"
       ]
     },
-    "public.service_type": {
+    "jobradar.service_type": {
       "name": "service_type",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "resume_review",
         "cover_letter_review",
@@ -2255,9 +2286,9 @@
         "salary_negotiation"
       ]
     },
-    "public.tx_status": {
+    "jobradar.tx_status": {
       "name": "tx_status",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "pending",
         "succeeded",
@@ -2265,9 +2296,9 @@
         "failed"
       ]
     },
-    "public.user_role": {
+    "jobradar.user_role": {
       "name": "user_role",
-      "schema": "public",
+      "schema": "jobradar",
       "values": [
         "candidate",
         "expert",
@@ -2275,7 +2306,9 @@
       ]
     }
   },
-  "schemas": {},
+  "schemas": {
+    "jobradar": "jobradar"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},
