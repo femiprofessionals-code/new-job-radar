@@ -68,6 +68,13 @@ export default async function OpportunityDetailPage(props: {
               <ScoreRing value={o.interviewProbability} size={84} label="interview prob." />
             </div>
             <div className="flex flex-col gap-2">
+              {o.job.url && (
+                <a href={o.job.url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="w-full">
+                    Apply on company site ↗
+                  </Button>
+                </a>
+              )}
               {o.application ? (
                 <Link href={`/applications/${o.application.id}`}>
                   <Button variant="secondary">In pipeline → {o.application.stage.replace("_", " ")}</Button>

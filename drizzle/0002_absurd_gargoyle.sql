@@ -1,0 +1,1 @@
+ALTER TABLE "jobradar"."jobs" ADD COLUMN "url" text;

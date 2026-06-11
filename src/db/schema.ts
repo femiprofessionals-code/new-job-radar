@@ -171,6 +171,7 @@ export const jobs = jobradar.table(
     requirements: jsonb("requirements").$type<string[]>().notNull().default([]),
     skills: jsonb("skills").$type<string[]>().notNull().default([]),
     seniority: text("seniority").notNull(),
+    url: text("url"),
     source: text("source").notNull().default("seed"),
     applicantEstimate: integer("applicant_estimate"),
     postedAt: timestamp("posted_at").notNull().defaultNow(),

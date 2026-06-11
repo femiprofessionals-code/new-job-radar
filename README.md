@@ -141,6 +141,20 @@ and salary negotiation — Stripe Connect payouts at an 80/20 split.
    lookup; the `users` table is the only integration point.
 7. **Deploy** — push to Vercel. `next build` is green with zero config.
 
+## Real-jobs sync (scraper → platform)
+
+`src/lib/sync/legacy-jobs.ts` flows jobs from a scraper's `public.jobs` table into
+`jobradar.jobs`, auto-detecting the column layout (title/company/salary/skills/url/…
+across common naming conventions), joining `public.companies` for names when needed,
+extracting skills from descriptions when absent, and scoring every new job for every
+candidate. Idempotent upserts (`lg-<id>`) make it safe on a schedule.
+
+- Manual: `npx tsx scripts/sync-jobs.ts --dry-run` (inspect mapping), then without the flag
+- Deployed: `GET /api/sync/jobs` — runs daily via Vercel Cron (`vercel.json`),
+  protected by `CRON_SECRET`
+- Source DB: `LEGACY_DATABASE_URL` if the scraper writes to a different database,
+  otherwise `DATABASE_URL`
+
 ## Scripts
 
 ```bash
