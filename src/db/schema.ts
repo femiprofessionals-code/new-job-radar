@@ -120,8 +120,22 @@ export const users = jobradar.table("users", {
   name: text("name").notNull(),
   role: userRole("role").notNull().default("candidate"),
   avatarUrl: text("avatar_url"),
+  passwordHash: text("password_hash"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const sessions = jobradar.table(
+  "sessions",
+  {
+    token: text("token").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("sessions_user_idx").on(t.userId)]
+);
 
 export const candidateProfiles = jobradar.table("candidate_profiles", {
   userId: text("user_id")

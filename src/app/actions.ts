@@ -4,11 +4,10 @@
  * Server actions — all writes flow through here.
  */
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { and, eq, sql } from "drizzle-orm";
 import { getDb, tables } from "@/db";
-import { getSessionUser } from "@/lib/session";
+import { requireUser } from "@/lib/session";
 import { tailorResume, draftCoverLetter } from "@/lib/engines/documents";
 import { scoreAts } from "@/lib/engines/scoring";
 import { answerCopilot, type CopilotContext } from "@/lib/engines/copilot";
@@ -22,18 +21,10 @@ import type { ApplicationStage, ServiceType } from "@/db/schema";
 
 const uid = () => crypto.randomUUID();
 
-/* ── Persona (demo auth) ── */
-
-export async function switchPersona(persona: "candidate" | "expert") {
-  const store = await cookies();
-  store.set("jr_persona", persona, { path: "/" });
-  redirect(persona === "expert" ? "/experts/queue" : "/");
-}
-
 /* ── Opportunities → Applications ── */
 
 export async function saveOpportunity(jobId: string): Promise<void> {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const id = uid();
   await db
@@ -51,7 +42,7 @@ export async function saveOpportunity(jobId: string): Promise<void> {
 }
 
 export async function moveApplicationStage(applicationId: string, stage: ApplicationStage) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const now = new Date();
   await db
@@ -77,7 +68,7 @@ export async function moveApplicationStage(applicationId: string, stage: Applica
 }
 
 export async function completeFollowUp(applicationId: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   await db
     .update(tables.applications)
@@ -97,7 +88,7 @@ export async function completeFollowUp(applicationId: string) {
 /* ── Document generation ── */
 
 export async function generateTailoredResume(applicationId: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const [app] = await db
     .select()
@@ -144,7 +135,7 @@ export async function generateTailoredResume(applicationId: string) {
 }
 
 export async function generateCoverLetterAction(applicationId: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const [app] = await db
     .select()
@@ -191,7 +182,7 @@ export async function requestReview(input: {
   priceCents: number;
   instructions: string;
 }) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const id = uid();
   await db.insert(tables.reviewRequests).values({
@@ -223,7 +214,7 @@ export async function requestReview(input: {
  * exactly one matches the row. No row returned ⇒ someone else won.
  */
 export async function claimReview(reviewRequestId: string): Promise<{ ok: boolean; reason?: string }> {
-  const user = await getSessionUser();
+  const user = await requireUser();
   if (!user.expertId) return { ok: false, reason: "Not an expert account" };
   const db = await getDb();
   const claimed = await db
@@ -249,7 +240,7 @@ export async function claimReview(reviewRequestId: string): Promise<{ ok: boolea
 }
 
 export async function releaseClaim(reviewRequestId: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   if (!user.expertId) return;
   const db = await getDb();
   await db
@@ -271,7 +262,7 @@ export async function deliverFeedback(input: {
   scorecard: { dimension: string; score: number; note: string }[];
   suggestions: string[];
 }) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   if (!user.expertId) return;
   const db = await getDb();
   const [req] = await db
@@ -310,7 +301,7 @@ export async function deliverFeedback(input: {
 }
 
 export async function acceptReview(reviewRequestId: string, rating: number, comment: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const [req] = await db
     .select()
@@ -366,7 +357,7 @@ export async function acceptReview(reviewRequestId: string, rating: number, comm
 /* ── Mock interviews ── */
 
 export async function startMockSession(focus: string, targetCompany?: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const id = uid();
   await db.insert(tables.mockSessions).values({
@@ -388,7 +379,7 @@ export async function startMockSession(focus: string, targetCompany?: string) {
 }
 
 export async function sendMockAnswer(sessionId: string, answer: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const [session] = await db
     .select()
@@ -422,7 +413,7 @@ export async function sendMockAnswer(sessionId: string, answer: string) {
 /* ── Copilot ── */
 
 export async function askCopilotAction(question: string) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   const d = await getDashboard(user.id);
 
@@ -465,7 +456,7 @@ export async function askCopilotAction(question: string) {
 }
 
 export async function resolveCopilotAction(actionId: string, status: "done" | "dismissed") {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   await db
     .update(tables.copilotActions)
@@ -536,7 +527,7 @@ export async function sendMockAnswerForm(formData: FormData) {
 /* ── Misc ── */
 
 export async function markAllNotificationsRead() {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   await db
     .update(tables.notifications)
@@ -546,7 +537,7 @@ export async function markAllNotificationsRead() {
 }
 
 export async function changePlan(plan: "free" | "pro" | "accelerator" | "elite") {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const db = await getDb();
   await db
     .update(tables.candidateProfiles)

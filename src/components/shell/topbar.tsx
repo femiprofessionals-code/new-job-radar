@@ -1,8 +1,9 @@
-import { Bell, Radar } from "lucide-react";
+import { Bell, LogOut, Radar, Settings, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { getSessionUser } from "@/lib/session";
+import { requireUser } from "@/lib/session";
 import { getNotifications, getUnreadCount } from "@/lib/data";
-import { markAllNotificationsRead, switchPersona } from "@/app/actions";
+import { markAllNotificationsRead } from "@/app/actions";
+import { enterDemo, signOut } from "@/app/auth-actions";
 import { Avatar, Badge } from "@/components/ui/primitives";
 import { timeAgo } from "@/lib/utils";
 
@@ -20,7 +21,7 @@ export function Brand() {
 }
 
 export async function Topbar() {
-  const user = await getSessionUser();
+  const user = await requireUser();
   const [notifications, unread] = await Promise.all([
     getNotifications(user.id),
     getUnreadCount(user.id),
@@ -84,48 +85,74 @@ export async function Topbar() {
           </div>
         </details>
 
-        {/* Persona switcher (demo auth) */}
+        {/* Account menu */}
         <details className="relative">
           <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-1.5 py-1 transition-colors hover:bg-surface-3 [&::-webkit-details-marker]:hidden">
             <Avatar name={user.name} size={28} />
             <span className="hidden text-sm font-medium md:block">{user.name}</span>
-            <Badge tone={user.role === "expert" ? "violet" : "signal"} className="hidden md:inline-flex">
-              {user.role === "expert" ? "Expert" : "Candidate"}
+            <Badge
+              tone={user.isDemo ? "warn" : user.role === "expert" ? "violet" : "signal"}
+              className="hidden md:inline-flex"
+            >
+              {user.isDemo ? "Demo" : user.role === "expert" ? "Expert" : "Candidate"}
             </Badge>
           </summary>
           <div className="absolute right-0 top-11 z-50 w-64 rounded-xl border border-edge-strong bg-surface-2 p-2 shadow-2xl">
-            <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-ink-faint">
-              Demo personas
-            </p>
-            <form action={switchPersona.bind(null, "candidate")}>
-              <button
-                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left hover:bg-surface-3"
-                disabled={user.role === "candidate"}
-              >
-                <Avatar name="Alex Morgan" size={28} />
-                <span>
-                  <span className="block text-xs font-medium">Alex Morgan</span>
-                  <span className="block text-[11px] text-ink-muted">Candidate · job seeker view</span>
-                </span>
-                {user.role === "candidate" && <Badge tone="signal" className="ml-auto">Active</Badge>}
-              </button>
-            </form>
-            <form action={switchPersona.bind(null, "expert")}>
-              <button
-                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left hover:bg-surface-3"
-                disabled={user.role === "expert"}
-              >
-                <Avatar name="Sarah Chen" size={28} />
-                <span>
-                  <span className="block text-xs font-medium">Sarah Chen</span>
-                  <span className="block text-[11px] text-ink-muted">Expert · marketplace view</span>
-                </span>
-                {user.role === "expert" && <Badge tone="violet" className="ml-auto">Active</Badge>}
-              </button>
-            </form>
-            <p className="border-t border-edge mt-1 px-2 pt-2 text-[10px] leading-relaxed text-ink-faint">
-              Demo mode — swap personas to explore both sides of the marketplace. Real auth (Supabase) wires in via Settings → Integrations.
-            </p>
+            <div className="flex items-center gap-2 px-2 py-2">
+              <Avatar name={user.name} size={32} />
+              <div className="min-w-0">
+                <p className="truncate text-xs font-medium text-ink">{user.name}</p>
+                <p className="truncate text-[11px] text-ink-muted">{user.email}</p>
+              </div>
+            </div>
+
+            {user.isDemo ? (
+              <>
+                <div className="border-t border-edge pt-1">
+                  <p className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-faint">
+                    Switch demo persona
+                  </p>
+                  <form action={enterDemo.bind(null, "candidate")}>
+                    <button
+                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-ink-muted hover:bg-surface-3 disabled:opacity-50"
+                      disabled={user.role === "candidate"}
+                    >
+                      Alex Morgan — candidate view
+                    </button>
+                  </form>
+                  <form action={enterDemo.bind(null, "expert")}>
+                    <button
+                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-ink-muted hover:bg-surface-3 disabled:opacity-50"
+                      disabled={user.role === "expert"}
+                    >
+                      Sarah Chen — expert view
+                    </button>
+                  </form>
+                </div>
+                <div className="mt-1 border-t border-edge pt-2">
+                  <Link
+                    href="/signup"
+                    className="flex items-center gap-2 rounded-lg bg-signal px-2 py-2 text-xs font-semibold text-black hover:bg-signal/85"
+                  >
+                    <UserPlus size={13} /> Create your real account
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div className="border-t border-edge pt-1">
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs text-ink-muted hover:bg-surface-3 hover:text-ink"
+                >
+                  <Settings size={13} /> Settings & profile
+                </Link>
+                <form action={signOut}>
+                  <button className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs text-ink-muted hover:bg-danger-soft hover:text-danger">
+                    <LogOut size={13} /> Sign out
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
         </details>
       </div>
