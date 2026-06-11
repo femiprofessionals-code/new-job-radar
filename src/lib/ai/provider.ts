@@ -47,7 +47,11 @@ export async function generate(
 
   if (mode === "openai") {
     const { default: OpenAI } = await import("openai");
-    const client = new OpenAI();
+    // OPENAI_BASE_URL allows any OpenAI-compatible provider — including the
+    // free tiers of Google Gemini and Groq (see .env.example).
+    const client = new OpenAI({
+      baseURL: process.env.OPENAI_BASE_URL || undefined,
+    });
     const res = await client.chat.completions.create({
       model: process.env.OPENAI_MODEL ?? "gpt-4o",
       max_tokens: opts.maxTokens ?? 1024,
