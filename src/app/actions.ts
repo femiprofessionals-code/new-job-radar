@@ -32,7 +32,7 @@ export async function switchPersona(persona: "candidate" | "expert") {
 
 /* ── Opportunities → Applications ── */
 
-export async function saveOpportunity(jobId: string) {
+export async function saveOpportunity(jobId: string): Promise<void> {
   const user = await getSessionUser();
   const db = await getDb();
   const id = uid();
@@ -48,7 +48,6 @@ export async function saveOpportunity(jobId: string) {
   });
   revalidatePath("/opportunities");
   revalidatePath("/applications");
-  return id;
 }
 
 export async function moveApplicationStage(applicationId: string, stage: ApplicationStage) {
@@ -473,6 +472,65 @@ export async function resolveCopilotAction(actionId: string, status: "done" | "d
     .set({ status, resolvedAt: new Date() })
     .where(and(eq(tables.copilotActions.id, actionId), eq(tables.copilotActions.userId, user.id)));
   revalidatePath("/");
+}
+
+/* ── FormData wrappers (used by plain server-component forms) ── */
+
+export async function requestReviewForm(formData: FormData) {
+  await requestReview({
+    serviceType: String(formData.get("serviceType")) as ServiceType,
+    documentId: (formData.get("documentId") as string) || null,
+    targetExpertId: (formData.get("targetExpertId") as string) || null,
+    priceCents: Number(formData.get("priceCents")),
+    instructions: String(formData.get("instructions") ?? ""),
+  });
+  redirect("/experts?tab=reviews");
+}
+
+export async function deliverFeedbackForm(formData: FormData) {
+  const dims = ["Overall Quality", "Clarity & Impact", "Market Fit"];
+  const scorecard = dims
+    .map((dimension, i) => ({
+      dimension,
+      score: Number(formData.get(`score_${i}`) ?? 0),
+      note: String(formData.get(`note_${i}`) ?? ""),
+    }))
+    .filter((s) => s.score > 0);
+  const suggestions = String(formData.get("suggestions") ?? "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  await deliverFeedback({
+    reviewRequestId: String(formData.get("reviewRequestId")),
+    summary: String(formData.get("summary") ?? ""),
+    scorecard,
+    suggestions,
+  });
+}
+
+export async function acceptReviewForm(formData: FormData) {
+  await acceptReview(
+    String(formData.get("reviewRequestId")),
+    Number(formData.get("rating") ?? 5),
+    String(formData.get("comment") ?? "")
+  );
+}
+
+export async function askCopilotForm(formData: FormData) {
+  const q = String(formData.get("question") ?? "").trim();
+  if (q) await askCopilotAction(q);
+}
+
+export async function startMockForm(formData: FormData) {
+  await startMockSession(
+    String(formData.get("focus")),
+    String(formData.get("targetCompany") ?? "") || undefined
+  );
+}
+
+export async function sendMockAnswerForm(formData: FormData) {
+  const answer = String(formData.get("answer") ?? "").trim();
+  if (answer) await sendMockAnswer(String(formData.get("sessionId")), answer);
 }
 
 /* ── Misc ── */

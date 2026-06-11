@@ -1,7 +1,7 @@
 /**
  * Data access layer — every page reads through these queries.
  */
-import { and, asc, desc, eq, gte, inArray, isNull, isNotNull, lt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { getDb, tables } from "@/db";
 import {
   computeCareerHealth,
@@ -23,7 +23,6 @@ import type {
   MockSession,
   ReviewFeedbackRow,
   ReviewRequest,
-  User,
 } from "@/db/schema";
 
 const APPLIED_STAGES: ApplicationStage[] = [

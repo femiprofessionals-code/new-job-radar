@@ -18,9 +18,11 @@ import fs from "fs";
 import * as schema from "./schema";
 import { seedIfEmpty } from "./seed";
 
-export type Database =
-  | PgliteDatabase<typeof schema>
-  | ReturnType<typeof drizzlePostgres<typeof schema>>;
+/**
+ * Both drivers expose the same Drizzle query API; we type against one to keep
+ * call sites free of union-overload noise.
+ */
+export type Database = PgliteDatabase<typeof schema>;
 
 const globalForDb = globalThis as unknown as {
   __jobRadarDb?: Promise<Database>;
@@ -29,7 +31,7 @@ const globalForDb = globalThis as unknown as {
 async function createDb(): Promise<Database> {
   if (process.env.DATABASE_URL) {
     const client = postgres(process.env.DATABASE_URL, { prepare: false });
-    return drizzlePostgres(client, { schema });
+    return drizzlePostgres(client, { schema }) as unknown as Database;
   }
 
   const dataDir = path.join(process.cwd(), ".data", "pglite");
