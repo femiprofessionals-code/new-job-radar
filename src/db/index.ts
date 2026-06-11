@@ -34,7 +34,14 @@ async function createDb(): Promise<Database> {
     return drizzlePostgres(client, { schema }) as unknown as Database;
   }
 
-  const dataDir = path.join(process.cwd(), ".data", "pglite");
+  // Serverless platforms (Vercel/Lambda) only allow writes under /tmp. The
+  // demo DB is ephemeral there (re-seeded per cold start), which is fine —
+  // production should set DATABASE_URL.
+  const writableRoot =
+    process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
+      ? path.join("/tmp", "jobradar")
+      : path.join(process.cwd(), ".data");
+  const dataDir = path.join(writableRoot, "pglite");
   fs.mkdirSync(dataDir, { recursive: true });
   const pglite = new PGlite(dataDir);
   const db = drizzlePglite(pglite, { schema });
