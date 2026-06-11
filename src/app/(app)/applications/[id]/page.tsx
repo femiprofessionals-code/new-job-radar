@@ -27,6 +27,9 @@ import {
   Separator,
 } from "@/components/ui/primitives";
 import { StageSelect } from "@/components/stage-select";
+import { PendingButton } from "@/components/pending-button";
+import { getDb, tables } from "@/db";
+import { and, eq, isNull } from "drizzle-orm";
 import { atsReport } from "@/lib/engines/documents";
 import { formatSalaryRange, timeAgo } from "@/lib/utils";
 
@@ -41,6 +44,20 @@ export default async function ApplicationDetailPage(props: {
   if (!app) notFound();
 
   const ats = app.resumeDoc ? atsReport(app.resumeDoc.content, app.job) : null;
+
+  const db = await getDb();
+  const masters = await db
+    .select({ id: tables.documents.id })
+    .from(tables.documents)
+    .where(
+      and(
+        eq(tables.documents.userId, user.id),
+        eq(tables.documents.type, "resume"),
+        isNull(tables.documents.baseDocumentId)
+      )
+    )
+    .limit(1);
+  const hasMasterResume = masters.length > 0;
 
   return (
     <div className="mx-auto flex max-w-6xl animate-fade-up flex-col gap-4">
@@ -106,11 +123,20 @@ export default async function ApplicationDetailPage(props: {
               <CardTitle className="flex items-center gap-1.5">
                 <FileText size={14} className="text-signal" /> Tailored Resume
               </CardTitle>
-              <form action={generateTailoredResume.bind(null, app.id)}>
-                <Button size="sm" variant="secondary">
-                  <Sparkles size={13} /> {app.resumeDoc?.jobId ? "Regenerate" : "Generate tailored resume"}
-                </Button>
-              </form>
+              {hasMasterResume ? (
+                <form action={generateTailoredResume.bind(null, app.id)}>
+                  <PendingButton size="sm" variant="secondary" pendingText="Tailoring resume…">
+                    <Sparkles size={13} /> {app.resumeDoc?.jobId ? "Regenerate" : "Generate tailored resume"}
+                  </PendingButton>
+                </form>
+              ) : (
+                <Link
+                  href="/settings"
+                  className="rounded-lg border border-warn/40 bg-warn-soft px-3 py-1.5 text-xs font-medium text-warn hover:bg-warn/20"
+                >
+                  Add your master resume in Settings first →
+                </Link>
+              )}
             </CardHeader>
             <CardContent>
               {app.resumeDoc ? (
@@ -131,9 +157,9 @@ export default async function ApplicationDetailPage(props: {
                 <Mail size={14} className="text-info" /> Cover Letter
               </CardTitle>
               <form action={generateCoverLetterAction.bind(null, app.id)}>
-                <Button size="sm" variant="secondary">
+                <PendingButton size="sm" variant="secondary" pendingText="Writing letter…">
                   <Sparkles size={13} /> {app.coverDoc ? "Regenerate" : "Generate cover letter"}
-                </Button>
+                </PendingButton>
               </form>
             </CardHeader>
             <CardContent>

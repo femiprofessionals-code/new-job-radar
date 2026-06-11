@@ -6,11 +6,11 @@ import { askCopilotForm } from "@/app/actions";
 import {
   Avatar,
   Badge,
-  Button,
   Card,
   CardContent,
   Textarea,
 } from "@/components/ui/primitives";
+import { PendingButton } from "@/components/pending-button";
 import { aiMode } from "@/lib/ai/provider";
 
 export const metadata = { title: "Career Copilot" };
@@ -138,9 +138,9 @@ export default async function CopilotPage() {
           className="border-0 bg-transparent p-1 focus:border-0"
         />
         <div className="flex justify-end">
-          <Button type="submit" size="sm">
+          <PendingButton size="sm" pendingText="Analyzing your pipeline…">
             <Send size={13} /> Ask Copilot
-          </Button>
+          </PendingButton>
         </div>
       </form>
     </div>

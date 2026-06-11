@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PendingButton } from "@/components/pending-button";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Bot, Send } from "lucide-react";
 import { requireUser } from "@/lib/session";
@@ -116,9 +117,9 @@ export default async function MockSessionPage(props: { params: Promise<{ id: str
             <p className="text-[10px] text-ink-faint">
               Tip: structure with STAR — situation, task, action, result.
             </p>
-            <Button type="submit" size="sm">
+            <PendingButton size="sm" pendingText="Interviewer is responding…">
               <Send size={13} /> Submit answer
-            </Button>
+            </PendingButton>
           </div>
         </form>
       )}
