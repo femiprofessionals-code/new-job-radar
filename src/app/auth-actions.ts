@@ -14,7 +14,7 @@ import {
   SESSION_COOKIE,
   SESSION_TTL_DAYS,
 } from "@/lib/auth";
-import { getSessionUser, requireUser } from "@/lib/session";
+import { requireUser } from "@/lib/session";
 import { analyzeMatch, scoreAts } from "@/lib/engines/scoring";
 
 const uid = () => crypto.randomUUID();
@@ -32,8 +32,6 @@ async function startSession(userId: string) {
     path: "/",
     maxAge: SESSION_TTL_DAYS * 86_400,
   });
-  // A real session supersedes any demo persona.
-  store.delete("jr_persona");
 }
 
 export interface AuthState {
@@ -87,7 +85,6 @@ export async function signOut() {
     await db.delete(tables.sessions).where(eq(tables.sessions.token, token));
   }
   store.delete(SESSION_COOKIE);
-  store.delete("jr_persona");
   redirect("/login");
 }
 
@@ -348,13 +345,4 @@ export async function addMasterResume(formData: FormData) {
   });
   await computeMatchesForUser(user.id);
   redirect("/settings");
-}
-
-/* Demo persona entry (from the login page) */
-export async function enterDemo(persona: "candidate" | "expert") {
-  const current = await getSessionUser();
-  if (current && !current.isDemo) redirect("/");
-  const store = await cookies();
-  store.set("jr_persona", persona, { path: "/" });
-  redirect(persona === "expert" ? "/experts/queue" : "/");
 }

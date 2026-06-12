@@ -1,5 +1,6 @@
 /**
- * Demo-mode seed. Generates a fully populated, internally consistent world:
+ * LOCAL DEVELOPMENT seed (embedded PGlite only — never runs against a real
+ * DATABASE_URL). Generates a fully populated, internally consistent world:
  * a candidate mid-search, 60+ scored opportunities, a live application
  * pipeline, a staffed expert marketplace with an active review queue,
  * interviews, mock sessions, and a career-health history.
@@ -10,6 +11,7 @@ import type { PgliteDatabase } from "drizzle-orm/pglite";
 import { sql } from "drizzle-orm";
 import * as schema from "./schema";
 import { analyzeMatch, scoreAts } from "@/lib/engines/scoring";
+import { hashPassword } from "@/lib/auth";
 import { seededRandom } from "@/lib/utils";
 
 type DB = PgliteDatabase<typeof schema>;
@@ -160,8 +162,8 @@ export async function seedIfEmpty(outer: DB): Promise<void> {
   ];
 
   await db.insert(schema.users).values([
-    { id: DEMO_CANDIDATE_ID, email: "alex@demo.jobradar.app", name: "Alex Morgan", role: "candidate" },
-    { id: DEMO_EXPERT_USER_ID, email: "sarah@demo.jobradar.app", name: "Sarah Chen", role: "expert" },
+    { id: DEMO_CANDIDATE_ID, email: "alex@demo.jobradar.app", name: "Alex Morgan", role: "candidate", passwordHash: hashPassword("demo1234") },
+    { id: DEMO_EXPERT_USER_ID, email: "sarah@demo.jobradar.app", name: "Sarah Chen", role: "expert", passwordHash: hashPassword("demo1234") },
     { id: "user-cand-2", email: "jordan@demo.jobradar.app", name: "Jordan Lee", role: "candidate" },
     { id: "user-cand-3", email: "priya@demo.jobradar.app", name: "Priya Patel", role: "candidate" },
     { id: "user-cand-4", email: "marcus@demo.jobradar.app", name: "Marcus Webb", role: "candidate" },

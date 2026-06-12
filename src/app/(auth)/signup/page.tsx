@@ -7,7 +7,7 @@ export const metadata = { title: "Create account" };
 
 export default async function SignupPage() {
   const user = await getSessionUser();
-  if (user && !user.isDemo) redirect("/");
+  if (user) redirect("/");
 
   return (
     <Card className="w-full max-w-sm">

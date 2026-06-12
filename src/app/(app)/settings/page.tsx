@@ -76,37 +76,37 @@ export default async function SettingsPage() {
       name: "Database (Supabase / Postgres)",
       env: "DATABASE_URL",
       configured: !!process.env.DATABASE_URL,
-      demo: "Embedded PGlite database (.data/pglite)",
+      demo: "Embedded local database (development)",
     },
     {
       name: "Claude (Anthropic)",
       env: "ANTHROPIC_API_KEY",
       configured: !!process.env.ANTHROPIC_API_KEY,
-      demo: "Deterministic demo intelligence",
+      demo: "Built-in rule-based intelligence",
     },
     {
-      name: "OpenAI (fallback)",
+      name: "OpenAI-compatible (Gemini/Groq/OpenAI)",
       env: "OPENAI_API_KEY",
       configured: !!process.env.OPENAI_API_KEY,
-      demo: "Deterministic demo intelligence",
+      demo: "Built-in rule-based intelligence",
     },
     {
       name: "Stripe (subscriptions)",
       env: "STRIPE_SECRET_KEY",
       configured: !!process.env.STRIPE_SECRET_KEY,
-      demo: "Simulated billing — plan switches apply instantly",
+      demo: "Not configured — plan switches apply without payment",
     },
     {
       name: "Stripe Connect (expert payouts)",
       env: "STRIPE_CONNECT_CLIENT_ID",
       configured: !!process.env.STRIPE_CONNECT_CLIENT_ID,
-      demo: "Simulated escrow & 80/20 payout split",
+      demo: "Not configured — escrow & payouts recorded, not charged",
     },
     {
       name: "Inngest (background jobs)",
       env: "INNGEST_EVENT_KEY",
       configured: !!process.env.INNGEST_EVENT_KEY,
-      demo: "Jobs run inline (synchronously)",
+      demo: "Not configured — background work runs inline",
     },
   ];
 
@@ -169,7 +169,7 @@ export default async function SettingsPage() {
       </Card>
 
       {/* Edit profile (real candidate accounts) */}
-      {profile && !user.isDemo && (
+      {profile && (
         <Card>
           <CardHeader>
             <CardTitle>Edit profile</CardTitle>
@@ -224,7 +224,7 @@ export default async function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Subscription</CardTitle>
-            <p className="text-[11px] text-ink-faint">Demo mode: switching is instant, no payment</p>
+            <p className="text-[11px] text-ink-faint">Online payments arrive with the Stripe integration — plan changes apply instantly until then</p>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -299,7 +299,7 @@ export default async function SettingsPage() {
                 <div className="flex items-center gap-2">
                   {!i.configured && <p className="text-[11px] text-ink-faint">{i.demo}</p>}
                   <Badge tone={i.configured ? "signal" : "warn"}>
-                    {i.configured ? "Live" : "Demo"}
+                    {i.configured ? "Live" : "Off"}
                   </Badge>
                 </div>
               </div>

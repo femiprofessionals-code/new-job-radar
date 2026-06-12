@@ -1,9 +1,9 @@
-import { Bell, LogOut, Radar, Settings, UserPlus } from "lucide-react";
+import { Bell, LogOut, Radar, Settings } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/session";
 import { getNotifications, getUnreadCount } from "@/lib/data";
 import { markAllNotificationsRead } from "@/app/actions";
-import { enterDemo, signOut } from "@/app/auth-actions";
+import { signOut } from "@/app/auth-actions";
 import { Avatar, Badge } from "@/components/ui/primitives";
 import { timeAgo } from "@/lib/utils";
 
@@ -91,10 +91,10 @@ export async function Topbar() {
             <Avatar name={user.name} size={28} />
             <span className="hidden text-sm font-medium md:block">{user.name}</span>
             <Badge
-              tone={user.isDemo ? "warn" : user.role === "expert" ? "violet" : "signal"}
+              tone={user.role === "expert" ? "violet" : "signal"}
               className="hidden md:inline-flex"
             >
-              {user.isDemo ? "Demo" : user.role === "expert" ? "Expert" : "Candidate"}
+              {user.role === "expert" ? "Expert" : "Candidate"}
             </Badge>
           </summary>
           <div className="absolute right-0 top-11 z-50 w-64 rounded-xl border border-edge-strong bg-surface-2 p-2 shadow-2xl">
@@ -106,53 +106,19 @@ export async function Topbar() {
               </div>
             </div>
 
-            {user.isDemo ? (
-              <>
-                <div className="border-t border-edge pt-1">
-                  <p className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-faint">
-                    Switch demo persona
-                  </p>
-                  <form action={enterDemo.bind(null, "candidate")}>
-                    <button
-                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-ink-muted hover:bg-surface-3 disabled:opacity-50"
-                      disabled={user.role === "candidate"}
-                    >
-                      Alex Morgan — candidate view
-                    </button>
-                  </form>
-                  <form action={enterDemo.bind(null, "expert")}>
-                    <button
-                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs text-ink-muted hover:bg-surface-3 disabled:opacity-50"
-                      disabled={user.role === "expert"}
-                    >
-                      Sarah Chen — expert view
-                    </button>
-                  </form>
-                </div>
-                <div className="mt-1 border-t border-edge pt-2">
-                  <Link
-                    href="/signup"
-                    className="flex items-center gap-2 rounded-lg bg-signal px-2 py-2 text-xs font-semibold text-black hover:bg-signal/85"
-                  >
-                    <UserPlus size={13} /> Create your real account
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <div className="border-t border-edge pt-1">
-                <Link
-                  href="/settings"
-                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs text-ink-muted hover:bg-surface-3 hover:text-ink"
-                >
-                  <Settings size={13} /> Settings & profile
-                </Link>
-                <form action={signOut}>
-                  <button className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs text-ink-muted hover:bg-danger-soft hover:text-danger">
-                    <LogOut size={13} /> Sign out
-                  </button>
-                </form>
-              </div>
-            )}
+            <div className="border-t border-edge pt-1">
+              <Link
+                href="/settings"
+                className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs text-ink-muted hover:bg-surface-3 hover:text-ink"
+              >
+                <Settings size={13} /> Settings & profile
+              </Link>
+              <form action={signOut}>
+                <button className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs text-ink-muted hover:bg-danger-soft hover:text-danger">
+                  <LogOut size={13} /> Sign out
+                </button>
+              </form>
+            </div>
           </div>
         </details>
       </div>

@@ -1,7 +1,6 @@
 import { requireUser } from "@/lib/session";
 import { SidebarNav, MobileNav } from "@/components/shell/nav";
 import { Topbar, Brand } from "@/components/shell/topbar";
-import { Badge } from "@/components/ui/primitives";
 
 export default async function AppLayout({
   children,
@@ -17,16 +16,6 @@ export default async function AppLayout({
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-5 border-r border-edge bg-surface px-3 py-4 md:flex">
           <Brand />
           <SidebarNav persona={user.role} />
-          {user.isDemo && (
-            <div className="mt-auto rounded-xl border border-edge bg-surface-2 p-3">
-              <div className="flex items-center gap-1.5">
-                <Badge tone="warn">Demo session</Badge>
-              </div>
-              <p className="mt-1.5 text-[11px] leading-relaxed text-ink-faint">
-                You&apos;re exploring as a demo persona. Create an account to build your own radar.
-              </p>
-            </div>
-          )}
         </aside>
 
         {/* Main */}

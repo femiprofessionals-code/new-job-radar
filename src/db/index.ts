@@ -31,12 +31,9 @@ const globalForDb = globalThis as unknown as {
 async function createDb(): Promise<Database> {
   if (process.env.DATABASE_URL) {
     const client = postgres(process.env.DATABASE_URL, { prepare: false });
-    const db = drizzlePostgres(client, { schema }) as unknown as Database;
-    // Until real auth lands, the app needs its demo world (personas, jobs,
-    // experts) to exist. Seeds only when the users table is empty; a no-op
-    // count query afterwards.
-    await seedIfEmpty(db);
-    return db;
+    // Real databases start clean — users, experts, and jobs come from
+    // signups and the ingestion pipeline. (Demo seeding is local-dev only.)
+    return drizzlePostgres(client, { schema }) as unknown as Database;
   }
 
   // Serverless platforms (Vercel/Lambda) only allow writes under /tmp. The

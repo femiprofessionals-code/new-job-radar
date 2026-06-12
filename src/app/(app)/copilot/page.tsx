@@ -55,8 +55,8 @@ export default async function CopilotPage() {
             Your AI career manager. One job: more interviews, faster.
           </p>
         </div>
-        <Badge tone={mode === "demo" ? "warn" : "signal"}>
-          {mode === "demo" ? "Demo intelligence" : mode === "claude" ? "Claude" : "OpenAI"}
+        <Badge tone={mode === "demo" ? "neutral" : "signal"}>
+          {mode === "demo" ? "Built-in intelligence" : mode === "claude" ? "Claude" : "AI: Live"}
         </Badge>
       </div>
 
