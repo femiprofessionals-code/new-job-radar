@@ -54,9 +54,11 @@ export function Dropdown({
             panelClassName
           )}
           onClick={(e) => {
-            // Close after activating anything interactive inside.
+            // Close after link navigation (Link's router.push has already run
+            // by the time this bubbles). Form buttons must NOT close here —
+            // unmounting the form mid-click cancels its submission.
             const el = e.target as HTMLElement;
-            if (el.closest("a, button")) setOpen(false);
+            if (el.closest("a")) setOpen(false);
           }}
         >
           {children}
