@@ -103,6 +103,12 @@ export default async function SettingsPage() {
       demo: "Not configured — escrow & payouts recorded, not charged",
     },
     {
+      name: "Resend (email: password reset, notifications)",
+      env: "RESEND_API_KEY",
+      configured: !!process.env.RESEND_API_KEY,
+      demo: "Not configured — password reset disabled",
+    },
+    {
       name: "Inngest (background jobs)",
       env: "INNGEST_EVENT_KEY",
       configured: !!process.env.INNGEST_EVENT_KEY,

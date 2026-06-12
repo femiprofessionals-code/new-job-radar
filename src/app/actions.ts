@@ -18,6 +18,8 @@ import {
   scoreMock,
 } from "@/lib/engines/mock-interview";
 import type { ApplicationStage, ServiceType } from "@/db/schema";
+import { headers } from "next/headers";
+import { sendEmail, reviewDeliveredEmail } from "@/lib/email";
 
 const uid = () => crypto.randomUUID();
 
@@ -64,7 +66,7 @@ export async function moveApplicationStage(applicationId: string, stage: Applica
   });
   revalidatePath("/applications");
   revalidatePath(`/applications/${applicationId}`);
-  revalidatePath("/");
+  revalidatePath("/dashboard");
 }
 
 export async function completeFollowUp(applicationId: string) {
@@ -82,7 +84,7 @@ export async function completeFollowUp(applicationId: string) {
   });
   revalidatePath("/applications");
   revalidatePath(`/applications/${applicationId}`);
-  revalidatePath("/");
+  revalidatePath("/dashboard");
 }
 
 /* ── Document generation ── */
@@ -294,8 +296,21 @@ export async function deliverFeedback(input: {
     kind: "review",
     title: "Your expert review was delivered",
     body: "Open it to see the scorecard and suggested fixes.",
-    href: "/experts",
+    href: "/experts?tab=reviews",
   });
+  // Email the candidate (fire-and-forget)
+  const [candidate] = await db.select().from(tables.users).where(eq(tables.users.id, req.candidateId));
+  const [expertUser] = await db
+    .select({ name: tables.users.name })
+    .from(tables.experts)
+    .innerJoin(tables.users, eq(tables.experts.userId, tables.users.id))
+    .where(eq(tables.experts.id, user.expertId));
+  if (candidate) {
+    const h = await headers();
+    const origin = process.env.APP_URL ?? `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000"}`;
+    const mail = reviewDeliveredEmail(candidate.name, expertUser?.name ?? "Your expert", origin);
+    void sendEmail({ to: candidate.email, ...mail });
+  }
   revalidatePath("/experts/queue");
   revalidatePath("/experts");
 }
@@ -351,7 +366,7 @@ export async function acceptReview(reviewRequestId: string, rating: number, comm
       .where(eq(tables.experts.id, req.claimedBy));
   }
   revalidatePath("/experts");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
 }
 
 /* ── Mock interviews ── */
@@ -462,7 +477,7 @@ export async function resolveCopilotAction(actionId: string, status: "done" | "d
     .update(tables.copilotActions)
     .set({ status, resolvedAt: new Date() })
     .where(and(eq(tables.copilotActions.id, actionId), eq(tables.copilotActions.userId, user.id)));
-  revalidatePath("/");
+  revalidatePath("/dashboard");
 }
 
 /* ── FormData wrappers (used by plain server-component forms) ── */

@@ -22,6 +22,13 @@
       "when": 1781207536017,
       "tag": "0002_absurd_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781256088073,
+      "tag": "0003_wealthy_captain_flint",
+      "breakpoints": true
     }
   ]
 }

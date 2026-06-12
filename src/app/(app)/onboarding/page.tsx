@@ -104,7 +104,7 @@ export default async function OnboardingPage() {
     .select()
     .from(tables.candidateProfiles)
     .where(eq(tables.candidateProfiles.userId, user.id));
-  if (profile) redirect("/");
+  if (profile) redirect("/dashboard");
 
   return (
     <div className="mx-auto max-w-xl animate-fade-up">

@@ -16,6 +16,14 @@ import {
 } from "@/lib/auth";
 import { requireUser } from "@/lib/session";
 import { analyzeMatch, scoreAts } from "@/lib/engines/scoring";
+import { headers } from "next/headers";
+import { and, gt, isNull } from "drizzle-orm";
+import {
+  emailConfigured,
+  sendEmail,
+  passwordResetEmail,
+  welcomeEmail,
+} from "@/lib/email";
 
 const uid = () => crypto.randomUUID();
 
@@ -61,6 +69,11 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     passwordHash: hashPassword(password),
   });
   await startSession(userId);
+  // Fire-and-forget — signup never blocks on email delivery.
+  void appUrl().then((url) => {
+    const mail = welcomeEmail(name, url);
+    return sendEmail({ to: email, ...mail });
+  });
   redirect("/onboarding");
 }
 
@@ -74,7 +87,7 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
     return { error: "Invalid email or password." };
   }
   await startSession(user.id);
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function signOut() {
@@ -86,6 +99,76 @@ export async function signOut() {
   }
   store.delete(SESSION_COOKIE);
   redirect("/login");
+}
+
+
+async function appUrl(): Promise<string> {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, "");
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  return `${proto}://${host}`;
+}
+
+/* ── Password reset ── */
+
+export async function requestPasswordReset(
+  _prev: AuthState & { sent?: boolean },
+  formData: FormData
+): Promise<AuthState & { sent?: boolean }> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(email)) return { error: "Please enter a valid email address." };
+  if (!emailConfigured())
+    return { error: "Password reset email isn't configured yet — contact support." };
+
+  const db = await getDb();
+  const [user] = await db.select().from(tables.users).where(eq(tables.users.email, email));
+  // Always report success — never reveal whether an account exists.
+  if (user) {
+    const token = newSessionToken();
+    await db.insert(tables.passwordResetTokens).values({
+      token,
+      userId: user.id,
+      expiresAt: new Date(Date.now() + 3_600_000),
+    });
+    const mail = passwordResetEmail(user.name, `${await appUrl()}/reset-password?token=${token}`);
+    await sendEmail({ to: email, ...mail });
+  }
+  return { sent: true };
+}
+
+export async function resetPassword(
+  _prev: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const token = String(formData.get("token") ?? "");
+  const password = String(formData.get("password") ?? "");
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+
+  const db = await getDb();
+  const [row] = await db
+    .select()
+    .from(tables.passwordResetTokens)
+    .where(
+      and(
+        eq(tables.passwordResetTokens.token, token),
+        gt(tables.passwordResetTokens.expiresAt, new Date()),
+        isNull(tables.passwordResetTokens.usedAt)
+      )
+    );
+  if (!row) return { error: "This reset link is invalid or has expired — request a new one." };
+
+  await db
+    .update(tables.users)
+    .set({ passwordHash: hashPassword(password) })
+    .where(eq(tables.users.id, row.userId));
+  await db
+    .update(tables.passwordResetTokens)
+    .set({ usedAt: new Date() })
+    .where(eq(tables.passwordResetTokens.token, token));
+  // Invalidate every existing session for safety.
+  await db.delete(tables.sessions).where(eq(tables.sessions.userId, row.userId));
+  redirect("/login?reset=1");
 }
 
 /* ── Onboarding ── */
@@ -248,7 +331,7 @@ export async function completeCandidateOnboarding(formData: FormData) {
     breakdown: [],
   });
 
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function completeExpertOnboarding(formData: FormData) {

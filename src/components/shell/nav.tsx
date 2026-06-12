@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const CANDIDATE_NAV = [
-  { href: "/", label: "Home", icon: Home },
+  { href: "/dashboard", label: "Home", icon: Home },
   { href: "/opportunities", label: "Opportunities", icon: Radar },
   { href: "/applications", label: "Applications", icon: KanbanSquare },
   { href: "/experts", label: "Experts", icon: Users },
@@ -32,7 +32,7 @@ const EXPERT_NAV = [
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
+  if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/experts") return pathname === "/experts" || (pathname.startsWith("/experts/") && !pathname.startsWith("/experts/queue"));
   return pathname === href || pathname.startsWith(href + "/");
 }

@@ -18,7 +18,12 @@ export function LoginForm() {
         <Input name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
       </div>
       <div>
-        <FieldLabel>Password</FieldLabel>
+        <div className="mb-1 flex items-center justify-between">
+          <label className="text-xs font-medium text-ink-muted">Password</label>
+          <Link href="/forgot-password" className="text-[11px] text-signal hover:underline">
+            Forgot password?
+          </Link>
+        </div>
         <Input name="password" type="password" required autoComplete="current-password" placeholder="••••••••" />
       </div>
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
